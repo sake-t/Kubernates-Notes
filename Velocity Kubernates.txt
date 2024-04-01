@@ -1,0 +1,332 @@
+##Install minikube##
+
+from root user
+    1   clear
+    2  useradd velocity
+    3  passwd velocity
+    4  visudo
+    5  clear
+    6  yum install docker -y
+    7  systemctl start docker
+    8  systemctl enable docker
+    9  cat /etc/group
+   10  clear
+   11  docker ps
+   12  sudo su - velocity
+   13  gpasswd -a velocity docker
+   14  cat /etc/group
+   15  history
+
+https://kubernetes.io/docs/tasks/tools/
+https://minikube.sigs.k8s.io/docs/start/
+    
+    $ sudo su - velocity
+    $ curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+    $  sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+    $  sudo chmod -R 777 /usr/local/bin/kubectl
+    $  kubectl version
+    $  kubectl version --client
+    $  curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+    $  sudo install minikube-linux-amd64 /usr/local/bin/minikube && rm minikube-linux-amd64
+    $  chmod -R 777 /usr/local/bin/minikube
+    $  sudo chmod -R 777 /usr/local/bin/minikube
+    $  history
+    $  minikube start
+    $  kubectl version
+    $  minikube status
+    $  minikube ip
+    $  minikube ssh
+    $  minikube stop
+    $  minkube start
+    $  minikube start
+    $  minikube delete
+
+vi pods.yml
+kind: Pod
+apiVersion: v1
+metadata:
+  name: velocity
+
+spec:
+  containers:
+    - name: vel-1
+      image: centos
+      command : [ "ping", "localhost" ]
+
+
+
+    $   kubectl apply -f pod.yaml
+   17  kubctl get pods
+   19  kubectl describe pods
+   23  kubectl delete -f pod.yaml
+   24  kubectl delete pods velocity
+
+######annotations######
+kind: Pod
+apiVersion: v1
+metadata:
+  name: velocity
+  annotations:
+    owner: shantanu
+    description: this is my 1st pod
+    class: velocity
+
+
+spec:
+  containers:
+    - name: vel-1
+      image: centos
+      command : [ "ping", "localhost" ]
+
+         vi pod.yaml
+   60  clear
+   61  kubectl apply -f pod.yaml
+   62  kubectl get pods
+   63  kubectl describe pods
+   64  kubectl logs -f velocity -c vel-1
+   65  kubectl logs -f velocity -c vel-2
+   66  kubectl get pods
+   67  kubectl delete -f pod.yaml
+
+########multi-container pods############
+kind: Pod
+apiVersion: v1
+metadata:
+  name: velocity
+
+spec:
+  containers:
+    - name: vel-1
+      image: centos
+      command: [ "ping", "localhost" ]
+
+    - name: vel-2
+      image: centos
+      command: [ "ping", "localhost" ]
+
+         vi pod.yaml
+   44  clear
+   45  kubectl apply -f pod.yaml
+   46  kubectl get pods
+   47  kubectl descrive pods
+   48  kubectl describe pods velocity
+   49  kubectl logs -f velocity -c vel-1       (Log of particular container)
+   50  kubectl logs -f velocity -c vel-2
+   51  kubectl exec velocity -c vel-1 -- whoami   (Run container inside particular contaiiner)
+   52  kubectl exec velocity -c vel-2 -- whoami
+   53  kubectl exec velocity -c vel-2 -- hostname
+   54  kubectl exec velocity -c vel-1 -- hostname
+   56  kubectl exec velocity -itc vel-1 -- bash  (login into particular container)
+   57  kubectl exec velocity -itc vel-2 -- bash
+   58  kubectl delete -f pod.yaml
+
+
+####multi-container-pods -with diff type of container image##
+
+kind: Pod
+apiVersion: v1
+metadata:
+  name: velocity
+
+spec:
+  containers:
+    - name: vel-1
+      image: centos
+      command: [ "ping", "localhost" ]
+
+    - name: vel-2
+      image: ubuntu
+      command: [ "/bin/bash", "-c", "while true; do echo 'vel-app'; done" ]
+
+
+         vi pod.yaml
+   60  clear
+   61  kubectl apply -f pod.yaml
+   62  kubectl get pods
+   63  kubectl describe pods
+   64  kubectl logs -f velocity -c vel-1
+   65  kubectl logs -f velocity -c vel-2
+   66  kubectl get pods
+   67  kubectl delete -f pod.yaml
+
+
+#####env variables in pods############
+kind: Pod
+apiVersion: v1
+metadata:
+  name: velocity
+
+spec:
+  containers:
+    - name: vel-1
+      image: centos
+      command: [ "ping", "localhost" ]
+      env:
+        - name: class
+          value: velocity
+
+    - name: vel-2
+      image: ubuntu
+      command: [ "/bin/bash", "-c", "while true; do echo 'vel-app'; done" ]
+      env:
+        - name: class
+          value: byjus
+
+
+         vi pod.yaml
+   69  kubectl apply -f pod.yaml
+   70  kubectl get pods
+   71  kubectl describe pods
+   72  kubectl exec velocity -itc vel-1 -- bash    
+              echo $class 
+              env 
+        exit
+   73  kubectl exec velocity -itc vel-2 -- bash
+   74  cat pod.yaml
+   75  kubectl delete -f pod.yaml
+
+
+##########ports#####
+
+kind: Pod
+apiVersion: v1
+metadata:
+  name: velocity
+
+spec:
+  containers:
+    - name: vel-1
+      image: httpd
+      ports:
+        - containerPort: 80
+
+
+        vi pod.yaml
+   78  kubectl apply -f pod.yaml
+   79  kubectl get pods -o wide
+   80  curl 10.244.0.11:80   (node-ip)
+   82  curl http://www.google.com/
+   83  clear
+   84  ls -ltr
+   85  kubectl get pods
+   86  kubectl get pods -o wide
+   87  curl 10.244.0.11
+   88  minikube ssh
+
+
+
+[velocity@ip-172-31-43-54 ~]$ cat pod.yaml
+kind: Pod
+apiVersion: v1
+metadata:
+  name: velocity
+  labels:
+    env: dev
+    class: velocity
+
+
+spec:
+  containers:
+    - name: vel-1
+      image: centos
+      command: [ "ping", "localhost" ]
+
+         kubectl apply -f pod.yaml
+   88  kubectl get pods
+   89  kubectl describe pods
+        kubectl get pods --show-labels
+        kubectl label pod velocity name=shantanu
+        kubectl get pods --show-labels
+
+cat pod-2.yaml
+kind: Pod
+apiVersion: v1
+metadata:
+  name: velocity-1
+  labels:
+    env: qa
+    class: byju
+    name: mahesh
+
+spec:
+  containers:
+    - name: vel-2
+      image: centos
+      command: [ "ping", "localhost" ]
+kubectl get pods
+kubectl get pods --show-labels
+
+In order to search dev environment pods
+kubectl get pods -l env=dev     {Equality based selector}
+
+kubectl get pods -l class=byjus
+
+kubectl delete pods -l class=velocity    {Delete the pod}
+
+vi pod-3.yaml
+
+kind: Pod
+apiVersion: v1
+metadata:
+  name: velocity-2
+  labels:
+    env: uat
+    class: udemy
+
+spec:
+  containers:
+    - name: vel-3
+      image: centos
+      command: [ "ping", "localhost" ]
+
+
+        kubectl apply -f pod.yaml
+   88  kubectl get pods
+   89  kubectl describe pods
+         kubectl get nodes --show-lables
+         kubectl get pods -l evn=uat   {Equality based selector}
+         kubectl get pods -l evn!=uat
+         kubectl get pods -l 'evn in(uat,qa)'   {set Based Selectory}{Using Multiple Labels}
+         kubectl get pods -l 'evn notin(uat,qa)'
+         kubectl label pods velocity name=shantanu {Apply the label}
+         kubectl get nodes --show-lables
+         kubectl label pods velocity name-    {Imperical command to remove the label}
+
+
+##Node Selector ##
+
+NODE-SELECTOR
+
+vi pod.yaml
+kind: Pod
+apiVersion: v1
+metadata:
+  name: velocity
+  labels:
+    env: dev
+
+spec:
+  containers:
+    - name: vel-1
+      image: centos
+      command: [ "ping", "localhost" ]
+
+  nodeSelector:
+    machine: dev-1
+
+79  kubectl get pods
+   80  kubectl delete pods velocity
+   81  kubectl get nodes --show-lables
+   82  kubectl get nodes --show-label
+   83  kubectl get nodes --show-labels
+   84  kubectl label nodes minikube machine=dev-1
+   85  kubectl get nodes --show-labels
+   86  kubectl apply -f pod.yaml
+   87  kubectl get pos
+   88  kubectl get pods
+   89  kubectl describe pods
+
+
+
+
+
